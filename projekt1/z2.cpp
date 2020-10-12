@@ -7,12 +7,9 @@ int main(int argc, char *argv[]) {
     char* arg = argv[1];
     int argLen = strlen(arg);
 
-    for (int i = 0; i < argLen; i++) {
-        char a = arg[i];
-        char b = arg[argLen - i - 1];
-
+    for (int i = 0; i < argLen / 2; i++) {
         // porównywanie czy i-ty symbol argumentu nie jest różny od i-tego od końca
-        if (a != b) {
+        if (arg[i] != arg[argLen - i - 1]) {
             cout << arg << " nie jest palindromem" << endl;
             return 0;
         }
