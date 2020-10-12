@@ -2,8 +2,8 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
-    int masa_ciala;
-    int wzrost;
+    double masa_ciala;
+    double wzrost;
 
     cout << "masa ciała [kg]: ";
     cin >> masa_ciala;
