@@ -2,17 +2,16 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
-    // wczyt
-    char* masa_ciala = (char*) malloc(sizeof(char));
-    char* wzrost = (char*) malloc(sizeof(char));
+    int masa_ciala;
+    int wzrost;
 
     cout << "masa ciała [kg]: ";
     cin >> masa_ciala;
     cout << "wzrost [m]: ";
     cin >> wzrost;
 
-    // zamiana na doubly i obliczenie bmi
-    double bmi = atof(masa_ciala) / (atof(wzrost) * atof(wzrost));
+    // obliczenie bmi
+    double bmi = masa_ciala / (wzrost * wzrost);
 
     // printowanie w zależności od wartości bmi
     cout << "bmi: " << bmi << " - ";
