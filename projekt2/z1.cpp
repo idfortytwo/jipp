@@ -1,11 +1,11 @@
 #include <iostream>
 using namespace std;
 
-void swapIfSmaller(int *a, int *b) {
-    if (*a < *b) {
-        int temp = *a; 
-        *a = *b; 
-        *b = temp; 
+void swapIfSmaller(int *aPtr, int *bPtr) {
+    if (*aPtr < *bPtr) {
+        int tempPtr = *aPtr; 
+        *aPtr = *bPtr; 
+        *bPtr = tempPtr; 
     }
 }
 
