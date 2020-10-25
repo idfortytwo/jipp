@@ -1,6 +1,7 @@
 #include <iostream>
 using namespace std;
 
+// zamienia a i b używając jak reference tak i pointer
 void swapRefPtr(int &aRef, int *bPtr) {
     int temp = aRef; 
     aRef = *bPtr; 

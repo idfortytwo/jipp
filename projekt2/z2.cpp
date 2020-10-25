@@ -1,6 +1,7 @@
 #include <iostream>
 using namespace std;
 
+// zamienia a i b używając referenców
 void swapRef(int &aRef, int &bRef) {
     int temp = aRef; 
     aRef = bRef; 

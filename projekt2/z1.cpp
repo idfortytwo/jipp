@@ -1,6 +1,7 @@
 #include <iostream>
 using namespace std;
 
+// zamienia a i b jeśli wartość a jest mniejsza od b używając pointerów
 void swapIfSmaller(int *aPtr, int *bPtr) {
     if (*aPtr < *bPtr) {
         int tempPtr = *aPtr; 

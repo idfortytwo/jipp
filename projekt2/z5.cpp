@@ -1,6 +1,7 @@
 #include <iostream>
 using namespace std;
 
+// zamienia wartości a i b przyjmując wskaźniki 
 template <class T> void swap(T *a, T *b) {
     T temp = *a;
     *a = *b;

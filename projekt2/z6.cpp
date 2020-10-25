@@ -1,6 +1,8 @@
 #include <iostream>
 using namespace std;
 
+// zamienia wartości wskaźników na a i b przyjmując podwójne wskaźniki
+// dzięki temu do zmiennej tymczasowej nie kopiuje się wartość całego obiektu, tylko jego wskaźnika
 template <class T> void swap(T **a, T **b) {
     T* temp = *a;
     *a = *b;
