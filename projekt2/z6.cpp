@@ -14,7 +14,7 @@ int main() {
     int *aPtr = &a, *bPtr = &b;
 
     cout << "before: a=" << *aPtr << " b=" << *bPtr << endl;
-    swap(aPtr, bPtr);
+    swap(&aPtr, &bPtr);
     cout << "after:  a=" << *aPtr << " b=" << *bPtr << endl << endl;
     
 
@@ -22,6 +22,6 @@ int main() {
     string *cPtr = &c, *dPtr = &d;
     
     cout << "before: c=" << *cPtr << " d=" << *dPtr << endl;
-    swap(cPtr, dPtr);
+    swap(&cPtr, &dPtr);
     cout << "after:  c=" << *cPtr << " d=" << *dPtr << endl;
 }
