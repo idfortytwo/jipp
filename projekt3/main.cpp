@@ -122,11 +122,17 @@ void test() {
     Matrix m5 = m3.add(m4);
     cout << endl << "m5 = m3 + m4: " << endl; m5.print();
 
-    cout << endl << "Storing m5 in D:\\m5.mat..." << endl;
-    m5.store("m5.mat", "D:\\");
+    cout << endl << "Storing m5 in ./m5.mat..." << endl;
+    m5.store("m5.mat", ".");
 
-    cout << endl << "Creating m5_stored from D:\\m5.mat file..." << endl;
-    Matrix m5_stored("m5.mat", "D:\\");
+    cout << endl << "Creating m5_stored from ./m5.mat file..." << endl;
+    Matrix m5_stored("m5.mat", ".");
+
+    // cout << endl << "Storing m5 in D:\\m5.mat..." << endl;
+    // m5.store("m5.mat", "D:\\");
+
+    // cout << endl << "Creating m5_stored from D:\\m5.mat file..." << endl;
+    // Matrix m5_stored("m5.mat", "D:\\");
     cout << "m5_stored:" << endl; m5_stored.print();
 
     Matrix m6(3, 5);
