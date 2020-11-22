@@ -3,6 +3,9 @@
 
 using namespace std;
 
+#ifndef MATRIX
+#define MATRIX
+
 class Matrix {
     private:
         int n, m;
@@ -30,3 +33,5 @@ class Matrix {
         void store(string filename, string path);
         Matrix(string filename, string path);
 };
+
+#endif
