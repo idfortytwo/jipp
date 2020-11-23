@@ -5,7 +5,7 @@
 #include <iomanip>
 #include <sys/stat.h>
 
-#include "matrix.hpp"
+#include <matrix.hpp>
 
 using namespace std;
 
