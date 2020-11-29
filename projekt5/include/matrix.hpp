@@ -1,5 +1,6 @@
 #include <string>
 #include <sstream>
+#include <sqlite3/sqlite3.h>
 
 using namespace std;
 
@@ -16,8 +17,8 @@ class Matrix {
         void updateMaxLength();
 
     public:
-        Matrix(int n, int m);
-        Matrix(int n);
+        *Matrix(int n, int m);
+        *Matrix(int n);
 
         void set(int n, int m, double val);
         double get(int n, int m);
@@ -30,8 +31,8 @@ class Matrix {
         int rows();
         void print();
 
-        void store(string filename, string path);
-        Matrix(string filename, string path);
+        void store(sqlite3* db, const string& name);
+        *Matrix(sqlite3* db, const string& name);
 };
 
 #endif

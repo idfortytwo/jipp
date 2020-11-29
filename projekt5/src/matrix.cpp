@@ -1,16 +1,17 @@
 #include <iostream>
 #include <sstream>
-#include <fstream>
 #include <string>
 #include <iomanip>
+#include <vector>
 #include <sys/stat.h>
 
 #include <matrix.hpp>
+#include <sqlite3/sqlite3.h>
 
 using namespace std;
 
 
-Matrix::Matrix(int n, int m) {
+*Matrix::Matrix(int n, int m) {
     if (n <= 0) {
         stringstream errorMsg;
         errorMsg << "n should be greater than 0" << endl;
@@ -38,7 +39,7 @@ Matrix::Matrix(int n, int m) {
 }
 
 
-Matrix::Matrix(int n) {
+*Matrix::Matrix(int n) {
     if (n <= 0) {
         stringstream errorMsg;
         errorMsg << "n should be greater than 0" << endl;
@@ -124,7 +125,7 @@ Matrix Matrix::subtract(Matrix m2) {
         errorMsg << "Matrix dimension mismatch" << endl;
         errorMsg << "m1: " << this->n << "x" << this->m  << endl;
         errorMsg << "m2: " << m2.n << "x" << m2.m  << endl;
-        throw logic_error(errorMsg.str());
+        throw invalid_argument(errorMsg.str());
     }
 
     Matrix m3(n, m);
@@ -196,65 +197,93 @@ void Matrix::print() {
             cout << left << setw(maxLength) << data[i][j] << " ";
         cout << endl;
     }
-};
+}
 
 
-void Matrix::store(string filename, string path) {
-    ofstream output;
+void Matrix::store(sqlite3 *db, const string& name) {
+    char *zErrMsg = nullptr;
+    int rc;
 
-    struct stat info{};
-    if (stat(path.c_str(), &info) != 0) {
-        string errorMsg = "Cannot access directory \"" + path + "\"\n";
-        throw(invalid_argument(errorMsg));
+    stringstream ss;
+    ss << "INSERT INTO matrices ('matrix_name', 'n', 'm', 'data', 'max_length') ";
+    ss << "VALUES ('" << name  << "', '" << this->n << "', '" << this->m << "', '";
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < m; j++)
+            ss << data[i][j] << ' ';
+    ss << "', '" << this->maxLength << "');";
 
-    } else if(!(info.st_mode & S_IFDIR)) {
-        string errorMsg = '"' + path + "\" is not a directory\n";
-        throw(invalid_argument(errorMsg));
-    }
+    const string & sql_str = ss.str();
+    const char* sql = sql_str.c_str();
 
-    string fullPath = path + '/' + filename;
+    rc = sqlite3_exec(db, sql, nullptr, nullptr, &zErrMsg);
 
-    output.open(fullPath);
-    if (output.is_open()) {
-        output << n << ' ' << m << endl;
-
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < m; j++)
-                output << data[i][j] << ' ';
-            output << endl;
+    if (rc != SQLITE_OK) {
+        string errorMsg;
+        if (!strcmp(zErrMsg, "UNIQUE constraint failed: matrices.matrix_name"))
+            errorMsg = "Matrix with name \"" + name + "\" already exists in database";
+        else {
+            errorMsg = "Could not store matrix \"" + name + "\"";
         }
-        
-        cout << "Successfully created file \"" << filename << '"' << endl;
-        output.close();
-    } else {
-        string errorMsg = "Could not create file at \"" + fullPath + "\"\n";
         throw(runtime_error(errorMsg));
+
+    } else {
+        cout << "Successfully stored matrix \"" << name << '"' << endl;
     }
 };
 
+int loadMatrixData(void *data, int argc, char **argv, char **azColName) {
+    vector<string> *v = (vector<string> *)(data);
 
-Matrix::Matrix(string filename, string path) {
-    ifstream input;
-    string fullPath = path + '/' + filename;
+    v->push_back(argv[1]);
+    v->push_back(argv[2]);
+    v->push_back(argv[3]);
+    v->push_back(argv[4]);
 
-    input.open(fullPath);
-    if (input.is_open()) {
-        input >> this->n;
-        input >> this->m;
-        this->maxLength = 1;
+    return 0;
+}
 
-        data = new double*[n];
+*Matrix::Matrix(sqlite3 *db, const string& name) {
+    char *zErrMsg = nullptr;
+    int rc;
+    const char *sql;
+    string sql_str;
+    vector<string> matrixData;
 
-        for (int i = 0; i < n; i++) {
-            data[i] = new double[m];
+    sql_str = "SELECT * FROM matrices WHERE matrix_name == '" + name + "'";
+    sql = sql_str.c_str();
 
-            for (int j = 0; j < m; j++)
-                input >> data[i][j];
-        }
-        
-        input.close();
-    } else {
-        string errorMsg = "Could not read file at \"" + fullPath + "\"\n";
+    rc = sqlite3_exec(db, sql, loadMatrixData, &matrixData, &zErrMsg);
+    if (rc != SQLITE_OK) {
+        string errorMsg = "Error loading matrix \"" + name + "\": " + zErrMsg;
         throw(runtime_error(errorMsg));
+    } else {
+        if (!matrixData.empty()) {
+            cout << "Successfully loaded matrix \"" << name << '"' << endl;
+        } else {
+            string errorMsg = "No such matrix \"" + name + "\"\n";
+            throw(runtime_error(errorMsg));
+        }
+    }
+
+    string nStr = matrixData[0];
+    string mStr = matrixData[1];
+    stringstream dataSS(matrixData[2]);
+    string maxLengthStr = matrixData[3];
+
+    this->n = atoi(nStr.c_str());
+    this->m = atoi(mStr.c_str());
+    this->maxLength = atoi(maxLengthStr.c_str());
+
+    data = new double*[n];
+
+    for (int i = 0; i < n; i++) {
+        data[i] = new double[m];
+
+        for (int j = 0; j < m; j++) {
+            string buf;
+            dataSS >> buf;
+
+            data[i][j] = atof(buf.c_str());
+        }
     }
 }

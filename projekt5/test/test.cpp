@@ -1,10 +1,11 @@
-#include <matrix.hpp>
 #include <iostream>
+
 #include <sqlite3/sqlite3.h>
+#include <matrix.hpp>
 
 using namespace std;
 
-void testErrors() {
+void testErrors(sqlite3 *db) {
     cout << "--- Testing errors ---" << endl << endl;
     try {
         cout << "Creating matrix of size 3x0..." << endl;
@@ -41,7 +42,7 @@ void testErrors() {
         Matrix m22(2, 2);
         Matrix m23(2, 3);
         m22.add(m23);
-    } catch(logic_error &e) {
+    } catch(invalid_argument &e) {
         cout << "Error: " << e.what() << endl;
     }
 
@@ -50,39 +51,35 @@ void testErrors() {
         Matrix m15(1, 5);
         Matrix m41(4, 1);
         m15.multiply(m41);
-    } catch(logic_error &e) {
+    } catch(invalid_argument &e) {
         cout << "Error: " << e.what() << endl;
     }
 
     try {
-        cout << "Opening non existing file..." << endl;
-        Matrix("no_file", ".");
+        cout << "Loading non existing matrix..." << endl;
+        Matrix(db, "no_matrix");
     } catch (runtime_error &e) {
         cout << "Error: " << e.what() << endl;
     }
 
+    sqlite3 *noDB;
     try {
-        cout << "Storing matrix in non existing folder..." << endl;
+        cout << "Storing matrix using empty db..." << endl;
+
+        sqlite3_open("not_existant_database", &noDB);
+
         Matrix m(3, 3);
-        m.store("m.mat", "./no_folder");
-    } catch(invalid_argument &e) {
+        m.store(noDB, "m");
+
+    } catch(exception &e) {
         cout << "Error: " << e.what() << endl;
     }
+    sqlite3_close(noDB);
 
-    try {
-        cout << "Creating file with name \"folder\"..." << endl;
-        Matrix mFolder(1);
-        mFolder.store("folder", ".");
-
-        cout << "Trying to store matrix at \"./folder/m22.mat\"..." << endl;
-        Matrix m22(2);
-        m22.store("m22.mat", "./folder");
-    } catch(invalid_argument &e) {
-        cout << "Error: " << e.what() << endl;
-    }
 }
 
-void test() {
+void test(sqlite3 *db) {
+
     cout << endl << "--- Testing functionality ---" << endl << endl;
 
     Matrix m1(3, 5);
@@ -124,11 +121,11 @@ void test() {
     Matrix m5 = m3.add(m4);
     cout << endl << "m5 = m3 + m4: " << endl; m5.print();
 
-    cout << endl << "Storing m5 in ./m5.mat..." << endl;
-    m5.store("m5.mat", ".");
+    cout << endl << "Storing m5 in db..." << endl;
+    m5.store(db, "m5");
 
-    cout << endl << "Creating m5_stored from ./m5.mat file..." << endl;
-    Matrix m5_stored("m5.mat", ".");
+    cout << endl << "Loading m5_stored from db ..." << endl;
+    Matrix m5_stored(db, "m5");
     cout << "m5_stored:" << endl; m5_stored.print();
 
     Matrix m6(3, 5);
@@ -143,28 +140,68 @@ void test() {
     Matrix m7(m6.cols(), m6.rows());
     m7 = m5_stored.subtract(m6);
     cout << endl << "m7 = m5_stored - m6:" << endl;  m7.print();
+
 }
 
-void kek() {
-
+sqlite3* connect() {
     sqlite3 *db;
-    int rc;
 
-    rc = sqlite3_open("db.sqlite", &db);
-
+    int rc = sqlite3_open("db.sqlite", &db);
     if(rc) {
         cerr << "Can't open database: " << endl << sqlite3_errmsg(db) << endl;
+        exit(1);
     } else {
         cout << "Opened database successfully" << endl;
     }
-    sqlite3_close(db);
 
+    return db;
 }
 
-int main() {
-    kek();
+void createTableIfNotExists(sqlite3 *db) {
+    const char *sql;
+    char **errMsg = nullptr;
+    int rc;
 
-    //testErrors();
-    //cout << endl << endl;
-    //test();
+    sql = "CREATE TABLE IF NOT EXISTS matrices(\n"
+          "    matrix_name VARCHAR(30) PRIMARY KEY,\n"
+          "    n INTEGER NOT NULL,\n"
+          "    m INTEGER NOT NULL,\n"
+          "    data TEXT NOT NULL,\n"
+          "    max_length NOT NULL\n"
+          ");";
+    rc = sqlite3_exec(db, sql, nullptr, nullptr, errMsg);
+
+    if (rc != SQLITE_OK) {
+        cerr << "Error creating table:" << endl << errMsg << endl;
+        exit(1);
+    }
+}
+
+void clearTable(sqlite3 *db) {
+    const char *sql;
+    char **errMsg = nullptr;
+    int rc;
+
+    sql = "DELETE FROM matrices";
+    rc = sqlite3_exec(db, sql, nullptr, nullptr, errMsg);
+
+    if (rc != SQLITE_OK) {
+        cerr << "Error clearing table \"matrices\":" << endl << errMsg << endl;
+        exit(1);
+    }
+}
+
+
+
+int main() {
+    sqlite3* db = connect();
+
+    createTableIfNotExists(db);
+    clearTable(db);
+
+    test(db);
+    cout << endl << endl;
+    testErrors(db);
+
+    sqlite3_close(db);
 }
