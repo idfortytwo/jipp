@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <vector>
 #include <sys/stat.h>
+#include <math.h>
 
 #include <matrix.hpp>
 #include <sqlite3/sqlite3.h>
@@ -100,7 +101,7 @@ double Matrix::get(int n, int m) {
 };
 
 
-Matrix Matrix::add(Matrix m2) {
+Matrix Matrix::operator+(Matrix m2) {
     if (this->n != m2.n || this->m != m2.m) {
         stringstream errorMsg;
         errorMsg << "Matrix dimension mismatch" << endl;
@@ -119,7 +120,7 @@ Matrix Matrix::add(Matrix m2) {
 };
 
 
-Matrix Matrix::subtract(Matrix m2) {
+Matrix Matrix::operator-(Matrix m2) {
     if (this->n != m2.n || this->m != m2.m) {
         stringstream errorMsg;
         errorMsg << "Matrix dimension mismatch" << endl;
@@ -138,7 +139,7 @@ Matrix Matrix::subtract(Matrix m2) {
 };
 
 
-Matrix Matrix::multiply(Matrix m2) {
+Matrix Matrix::operator*(Matrix m2) {
     if (this->m != m2.n) {
         stringstream errorMsg;
         errorMsg << "Matrices dimension mismatch" << endl;
@@ -286,4 +287,45 @@ int loadMatrixData(void *data, int argc, char **argv, char **azColName) {
             data[i][j] = atof(buf.c_str());
         }
     }
+}
+
+ostream& operator<<(ostream &out, Matrix mat) {
+    out << mat.cols() << " " << mat.rows() << endl;
+    for (int i = 0; i < mat.cols(); i++) {
+        for (int j = 0; j < mat.rows(); j++)
+            out << mat.get(i, j) << ' ';
+        out << endl;
+    }
+    return out;
+}
+
+bool Matrix::operator==(Matrix m2) {
+    if (n != m2.n || m != m2.m) {
+        cout << "111" << endl;
+        return false;
+    }
+
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < m; j++)
+            if (fabs(data[i][j] - m2.data[i][j] > 0.0000000001))
+                return false;
+
+    return true;
+}
+
+double *Matrix::operator[](int i) {
+    if (i >= this->n) {
+        stringstream errorMsg;
+        errorMsg << "n should be less than matrix.n" << endl;
+        errorMsg << "matrix.n: " << this->n << endl;
+        errorMsg << "n: " << n << endl;
+        throw out_of_range(errorMsg.str());
+    } else if (i < 0) {
+        stringstream errorMsg;
+        errorMsg << "n should be positive" << endl;
+        errorMsg << "n: " << n << endl;
+        throw out_of_range(errorMsg.str());
+    }
+
+    return data[i];
 }
