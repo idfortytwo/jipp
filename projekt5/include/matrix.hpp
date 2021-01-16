@@ -35,7 +35,7 @@ class Matrix {
         void print();
 
         void store(sqlite3* db, const string& name);
-        *Matrix(sqlite3* db, const string& name);
+        Matrix(sqlite3* db, const string& name);
 };
 
 #endif

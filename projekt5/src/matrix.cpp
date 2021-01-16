@@ -243,7 +243,7 @@ int loadMatrixData(void *data, int argc, char **argv, char **azColName) {
     return 0;
 }
 
-*Matrix::Matrix(sqlite3 *db, const string& name) {
+Matrix::Matrix(sqlite3 *db, const string& name) {
     char *zErrMsg = nullptr;
     int rc;
     const char *sql;
