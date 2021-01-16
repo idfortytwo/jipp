@@ -12,7 +12,7 @@
 using namespace std;
 
 
-*Matrix::Matrix(int n, int m) {
+Matrix::Matrix(int n, int m) {
     if (n <= 0) {
         stringstream errorMsg;
         errorMsg << "n should be greater than 0" << endl;
@@ -40,7 +40,7 @@ using namespace std;
 }
 
 
-*Matrix::Matrix(int n) {
+Matrix::Matrix(int n) {
     if (n <= 0) {
         stringstream errorMsg;
         errorMsg << "n should be greater than 0" << endl;

@@ -17,8 +17,8 @@ class Matrix {
         void updateMaxLength();
 
     public:
-        *Matrix(int n, int m);
-        *Matrix(int n);
+        Matrix(int n, int m);
+        Matrix(int n);
 
         void set(int n, int m, double val);
         double get(int n, int m);
