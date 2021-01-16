@@ -39,11 +39,11 @@ void* eat(void* _pos) {
 }
 
 int main() {
-    for (auto &lock : forks)
-        pthread_mutex_init(&lock, nullptr);
+    for (auto &fork : forks)
+        pthread_mutex_init(&fork, nullptr);
 
-    for (int i = 0; i < 5; i++)
-        pthread_create(&philosophers[i], nullptr, eat, (void*) i);
+    for (int pos = 0; pos < 5; pos++)
+        pthread_create(&philosophers[pos], nullptr, eat, (void*) pos);
 
     for (auto &philosopher : philosophers)
         pthread_join(philosopher, nullptr);
